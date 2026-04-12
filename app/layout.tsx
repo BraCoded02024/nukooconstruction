@@ -1,7 +1,12 @@
 import type { Metadata } from 'next'
 import { Playfair_Display, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { getSiteUrl } from '@/lib/site-url'
 import './globals.css'
+
+const siteUrl = getSiteUrl()
+const defaultDescription =
+  'Nukoo Construction & Properties — construction and real estate services. Find exclusive properties and building projects in prime locations.'
 
 const playfair = Playfair_Display({ 
   subsets: ["latin"],
@@ -13,9 +18,39 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Nukoo Construction & Properties',
-  description: 'Building dreams and providing exclusive real estate and construction services in the world\'s most desirable locations',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'Nukoo Construction & Properties | Real Estate & Building',
+    template: '%s | Nukoo Construction & Properties',
+  },
+  description: defaultDescription,
+  keywords: [
+    'Nukoo',
+    'Nukoo Construction',
+    'Nukooconstruction',
+    'Nukoo Construction and Properties',
+    'construction company',
+    'real estate',
+    'properties for sale',
+    'building contractor',
+  ],
   generator: 'v0.app',
+  alternates: { canonical: '/' },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: siteUrl,
+    siteName: 'Nukoo Construction & Properties',
+    title: 'Nukoo Construction & Properties',
+    description: defaultDescription,
+    images: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nukoo Construction & Properties',
+    description: defaultDescription,
+  },
+  robots: { index: true, follow: true },
   icons: {
     icon: [
       {
