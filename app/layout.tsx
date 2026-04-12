@@ -44,7 +44,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${playfair.variable} ${inter.variable} font-sans antialiased`}>
         {children}
-        <Analytics />
+        {process.env.VERCEL ? <Analytics /> : null}
       </body>
     </html>
   )
