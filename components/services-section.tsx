@@ -2,41 +2,105 @@
 
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
-import { Home, Key, TrendingUp, Users, ChevronLeft, ChevronRight } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
+import { Home, Key, TrendingUp, Users, ChevronLeft, ChevronRight, Hammer, Paintbrush, LayoutGrid } from "lucide-react"
+import Image from "next/image"
 import { LineReveal } from "./text-reveal"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
-const services = [
+export type ServiceItem = {
+  icon: LucideIcon
+  title: string
+  description: string
+  /** Longer copy shown in the detail dialog; falls back to description if omitted */
+  details?: string
+  number: string
+  image: string
+}
+
+const services: ServiceItem[] = [
   {
     icon: Home,
-    title: "Property Acquisition",
-    description: "Expert guidance in finding and securing your dream residence, with access to exclusive off-market listings.",
+    title: "Property Building",
+    description: "Expert in building of properties, from start to finish.",
+    details:
+      "We manage new builds and major structural work end to end—foundations, block work, structural shells, and handover-ready finishes. Our team coordinates materials, safety, and timelines so your project stays on budget without cutting corners.",
     number: "01",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
+    image: "/images/services/building_properties.jpeg",
   },
   {
     icon: TrendingUp,
-    title: "Investment Advisory",
-    description: "Strategic real estate investment consulting to maximize returns and build your luxury property portfolio.",
+    title: "Roofing Works",
+    description: "Strategic, quality and modern roofing works.",
+    details:
+      "From trusses and decking to insulation, waterproofing, and final roof coverings, we install systems suited to your climate and design. We focus on weather-tight details, drainage, and long-term durability so your roof protects the whole structure.",
     number: "02",
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80"
+    image: "/images/services/roofing_works.jpeg",
   },
   {
     icon: Key,
-    title: "Seller Representation",
-    description: "Premium marketing and negotiation services to achieve the highest value for your exceptional property.",
+    title: "Electrical Installation Works",
+    description: "We handle all electrical installations",
+    details:
+      "Complete electrical fit-out for homes and commercial spaces: distribution, cabling, sockets, lighting, and compliance with safe practices. We plan loads and circuits clearly and test before sign-off so installations are reliable and maintainable.",
     number: "03",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80"
+    image: "/images/services/electrical_works.jpeg",
   },
   {
     icon: Users,
-    title: "Concierge Services",
-    description: "Comprehensive lifestyle management including property management, renovation, and relocation assistance.",
+    title: "Plumbing Works",
+    description: "We handle all plumbing installations and related works",
+    details:
+      "Water supply, waste and vent systems, fixtures, and leak-free connections—installed to practical layouts that are easy to service later. We coordinate with other trades to avoid clashes and keep wet areas performing as they should.",
     number: "04",
-    image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&q=80"
+    image: "/images/services/plumbing_works.jpeg",
+  },
+  {
+    icon: Hammer,
+    title: "Landscaping Works",
+    description: "We handle all landscaping works",
+    details:
+      "Grading, planting beds, paths, edging, and outdoor finishes that tie the building to its site. We balance drainage, usable space, and appearance so outdoor areas stay attractive and low-maintenance over time.",
+    number: "05",
+    image: "/images/services/landscaping_works.jpeg",
+  },
+  {
+    icon: Paintbrush,
+    title: "Road Construction Works",
+    description: "All road construction works and related",
+    details:
+      "Subgrade preparation, base layers, compaction, and surfacing for access roads and small infrastructure. We pay attention to levels, stormwater, and edge details so surfaces hold up under traffic and weather.",
+    number: "06",
+    image: "/images/services/roadconstruction_works.jpeg",
+  },
+  {
+    icon: LayoutGrid,
+    title: "Land For Sale",
+    description: "We have a variety of land for sale in different locations",
+    details:
+      "Plots in multiple locations to suit residential or investment goals. We can outline boundaries, access, and practical next steps so you understand what you are buying and how to move forward with planning or construction.",
+    number: "07",
+    image: "/images/services/landforsale_works.jpeg",
   },
 ]
 
-function ServiceCard({ service, index, isMobile = false }: { service: typeof services[0], index: number, isMobile?: boolean }) {
+function ServiceCard({
+  service,
+  index,
+  isMobile = false,
+  onOpenDetails,
+}: {
+  service: ServiceItem
+  index: number
+  isMobile?: boolean
+  onOpenDetails?: () => void
+}) {
   const ref = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0.5)
   const y = useMotionValue(0.5)
@@ -86,18 +150,28 @@ function ServiceCard({ service, index, isMobile = false }: { service: typeof ser
       className={`h-full ${isMobile ? 'w-[300px] flex-shrink-0' : ''}`}
     >
       <motion.div
-        className="group relative bg-card h-full border border-border/50 overflow-hidden"
+        className="group relative bg-card h-full border border-border/50 overflow-hidden cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-secondary"
         whileHover={{ borderColor: "var(--primary)", y: -8 }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.3 }}
+        role="button"
+        tabIndex={0}
+        aria-label={`View full details: ${service.title}`}
+        onClick={() => onOpenDetails?.()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            onOpenDetails?.()
+          }
+        }}
       >
-        {/* Image with effects */}
-        <div className="relative h-48 overflow-hidden">
+        {/* Image: object-contain so the full photo is visible (letterboxing on wide shots) */}
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
           <motion.img
             src={service.image}
             alt={service.title}
-            className="w-full h-full object-cover"
-            whileHover={{ scale: 1.1 }}
+            className="w-full h-full object-contain object-center"
+            whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.6 }}
           />
           
@@ -171,6 +245,9 @@ function ServiceCard({ service, index, isMobile = false }: { service: typeof ser
             <p className="text-muted-foreground font-sans text-sm leading-relaxed">
               {service.description}
             </p>
+            <p className="mt-3 text-xs font-sans text-primary/90 tracking-wide">
+              View full details
+            </p>
           </motion.div>
           
           {/* Animated bottom line */}
@@ -197,7 +274,11 @@ function ServiceCard({ service, index, isMobile = false }: { service: typeof ser
 }
 
 // Mobile horizontal scroll carousel
-function MobileServicesCarousel() {
+function MobileServicesCarousel({
+  onSelectService,
+}: {
+  onSelectService: (service: ServiceItem) => void
+}) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
@@ -260,8 +341,13 @@ function MobileServicesCarousel() {
         style={{ scrollSnapType: 'x mandatory' }}
       >
         {services.map((service, index) => (
-          <div key={service.title} style={{ scrollSnapAlign: 'start' }}>
-            <ServiceCard service={service} index={index} isMobile />
+          <div key={`${service.number}-${service.title}`} style={{ scrollSnapAlign: "start" }}>
+            <ServiceCard
+              service={service}
+              index={index}
+              isMobile
+              onOpenDetails={() => onSelectService(service)}
+            />
           </div>
         ))}
       </div>
@@ -280,6 +366,7 @@ function MobileServicesCarousel() {
 }
 
 export function ServicesSection() {
+  const [detailService, setDetailService] = useState<ServiceItem | null>(null)
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -342,14 +429,49 @@ export function ServicesSection() {
         </div>
         
         {/* Mobile carousel */}
-        <MobileServicesCarousel />
-        
+        <MobileServicesCarousel onSelectService={setDetailService} />
+
         {/* Desktop grid */}
         <div className="hidden md:grid grid-cols-1 md:grid-cols-2 gap-8 px-6">
           {services.map((service, index) => (
-            <ServiceCard key={service.title} service={service} index={index} />
+            <ServiceCard
+              key={`${service.number}-${service.title}`}
+              service={service}
+              index={index}
+              onOpenDetails={() => setDetailService(service)}
+            />
           ))}
         </div>
+
+        <Dialog open={detailService !== null} onOpenChange={(open) => !open && setDetailService(null)}>
+          <DialogContent
+            showCloseButton
+            className="max-h-[min(90vh,900px)] max-w-[min(calc(100vw-2rem),56rem)] gap-0 overflow-y-auto overflow-x-hidden p-0 sm:max-w-[min(calc(100vw-2rem),56rem)]"
+          >
+            {detailService ? (
+              <>
+                <div className="relative h-[min(52vh,480px)] w-full bg-muted">
+                  <Image
+                    src={detailService.image}
+                    alt={detailService.title}
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 768px) 100vw, 896px"
+                  />
+                </div>
+                <div className="space-y-3 p-6 sm:p-8">
+                  <DialogHeader className="text-left">
+                    <p className="text-primary font-sans text-xs tracking-[0.25em]">{detailService.number}</p>
+                    <DialogTitle className="font-serif text-2xl sm:text-3xl">{detailService.title}</DialogTitle>
+                    <DialogDescription className="text-foreground/90 font-sans text-base leading-relaxed">
+                      {detailService.details ?? detailService.description}
+                    </DialogDescription>
+                  </DialogHeader>
+                </div>
+              </>
+            ) : null}
+          </DialogContent>
+        </Dialog>
       </div>
       
       {/* Bottom decorative line */}

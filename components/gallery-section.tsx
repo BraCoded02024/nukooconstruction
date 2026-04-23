@@ -8,30 +8,30 @@ import { ArrowRight, ArrowLeft } from "lucide-react"
 
 const galleryImages = [
   {
-    src: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=100",
+    src: "/images/featured1.jpeg",
     title: "Modern Architecture",
-    location: "Beverly Hills"
+    location: "Ghana-Oyarifa",
   },
   {
-    src: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1920&q=100",
+    src: "/images/featured2.jpeg",
     title: "Luxury Interior",
-    location: "Manhattan"
+    location: "Ghana",
   },
-  {
-    src: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1920&q=100",
-    title: "Waterfront Living",
-    location: "Miami Beach"
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=100",
-    title: "Contemporary Design",
-    location: "Malibu"
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1920&q=100",
-    title: "Estate Living",
-    location: "Hamptons"
-  }
+  // {
+  //   src: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1920&q=100",
+  //   title: "Waterfront Living",
+  //   location: "Miami Beach"
+  // },
+  // {
+  //   src: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=100",
+  //   title: "Contemporary Design",
+  //   location: "Malibu"
+  // },
+  // {
+  //   src: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1920&q=100",
+  //   title: "Estate Living",
+  //   location: "Hamptons"
+  // }
 ]
 
 export function GallerySection() {
