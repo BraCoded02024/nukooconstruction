@@ -26,7 +26,8 @@ export function PropertiesSection() {
     async function fetchProperties() {
       try {
         const response = await getProperties()
-        setProperties(response.data)
+        const raw = response?.data
+        setProperties(Array.isArray(raw) ? raw : [])
       } catch (err) {
         console.error('Error fetching properties:', err)
       } finally {
@@ -50,22 +51,23 @@ export function PropertiesSection() {
       {/* ... (rest of the component remains the same) */}
       <div className="max-w-7xl mx-auto relative z-10">
         {isMobile ? (
-          <motion.div 
-            className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide no-scrollbar"
-            style={{ 
+          <div
+            className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide no-scrollbar -mx-4 px-4 md:mx-0 md:px-0"
+            style={{
               WebkitOverflowScrolling: 'touch',
               msOverflowStyle: 'none',
               scrollbarWidth: 'none',
             }}
-            drag="x"
-            dragConstraints={{ left: -1000, right: 0 }}
           >
             {properties.map((property, index) => (
-              <div key={property.id} className="min-w-[85vw] snap-center">
+              <div
+                key={property.id}
+                className="min-w-[min(85vw,calc(100vw-2rem))] max-w-[min(85vw,calc(100vw-2rem))] shrink-0 snap-center"
+              >
                 <PropertyCard property={property} index={index} />
               </div>
             ))}
-          </motion.div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-8 lg:gap-12">
             {properties.map((property, index) => (

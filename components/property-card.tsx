@@ -1,9 +1,16 @@
 "use client"
 
 import { motion, useMotionValue, useSpring, useTransform, useInView, useAnimation } from "framer-motion"
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, useMemo, useCallback } from "react"
 import { MapPin, Maximize, BedDouble, Bath, ArrowUpRight } from "lucide-react"
 import Image from "next/image"
+
+function resolvePropertyImageUrl(src: string): string {
+  if (!src) return "/placeholder.jpg"
+  if (src.startsWith("http")) return src
+  const base = process.env.NEXT_PUBLIC_API_URL ?? ""
+  return `${base}${src}`
+}
 
 interface PropertyCardProps {
   property: {
@@ -24,6 +31,27 @@ export function PropertyCard({ property, index }: PropertyCardProps) {
   const isInView = useInView(ref, { once: true, margin: "-50px" })
   const controls = useAnimation()
   const [isMobile, setIsMobile] = useState(false)
+  const imageScrollRef = useRef<HTMLDivElement>(null)
+  const [activeImage, setActiveImage] = useState(0)
+
+  const imageUrls = useMemo(() => {
+    const list = (property.images ?? []).filter(Boolean) as string[]
+    if (list.length === 0) return ["/placeholder.jpg"]
+    return list.map(resolvePropertyImageUrl)
+  }, [property.images])
+
+  const onImageStripScroll = useCallback(() => {
+    const el = imageScrollRef.current
+    if (!el) return
+    const w = el.clientWidth
+    if (!w) return
+    setActiveImage(Math.round(el.scrollLeft / w))
+  }, [])
+
+  useEffect(() => {
+    setActiveImage(0)
+    if (imageScrollRef.current) imageScrollRef.current.scrollLeft = 0
+  }, [property.id, imageUrls.length])
   
   const x = useMotionValue(0.5)
   const y = useMotionValue(0.5)
@@ -195,32 +223,70 @@ export function PropertyCard({ property, index }: PropertyCardProps) {
           transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
         />
         
-        {/* Image with 3D depth and motion */}
-        <motion.div
-          className="relative w-full h-full"
-          style={{ 
-            scale: imageScale,
-            transformStyle: "preserve-3d",
-          }}
-          whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Image
-            src={
-              property.images && property.images.length > 0 
-                ? (property.images[0].startsWith('http') 
-                    ? property.images[0] 
-                    : `${process.env.NEXT_PUBLIC_API_URL}${property.images[0]}`)
-                : '/placeholder.jpg'
-            }
-            alt={property.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            quality={100}
-            priority={index < 4}
-          />
-        </motion.div>
+        {/* Image(s): horizontal swipe on this area when multiple photos */}
+        {imageUrls.length <= 1 ? (
+          <motion.div
+            className="relative w-full h-full"
+            style={{
+              scale: imageScale,
+              transformStyle: "preserve-3d",
+            }}
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Image
+              src={imageUrls[0]}
+              alt={property.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              quality={100}
+              priority={index < 4}
+            />
+          </motion.div>
+        ) : (
+          <>
+            <div
+              ref={imageScrollRef}
+              onScroll={onImageStripScroll}
+              className="flex h-full w-full overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide no-scrollbar touch-pan-x"
+              style={{ WebkitOverflowScrolling: "touch" }}
+            >
+              {imageUrls.map((src, i) => (
+                <div
+                  key={`${property.id}-img-${i}`}
+                  className="relative h-full min-w-full shrink-0 snap-center"
+                >
+                  <Image
+                    src={src}
+                    alt={`${property.title} — photo ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 85vw, (max-width: 1200px) 50vw, 33vw"
+                    quality={100}
+                    priority={index < 4 && i === 0}
+                    draggable={false}
+                  />
+                </div>
+              ))}
+            </div>
+            <div
+              className="absolute bottom-[5.5rem] left-0 right-0 z-[25] flex justify-center gap-1.5 pointer-events-none md:bottom-24"
+              aria-hidden
+            >
+              {imageUrls.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    i === activeImage
+                      ? "w-6 bg-background"
+                      : "w-1.5 bg-background/55"
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
         
         {/* Animated gradient overlay */}
         <motion.div

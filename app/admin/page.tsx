@@ -26,7 +26,7 @@ export default function AdminPage() {
   // Properties State
   const [properties, setProperties] = useState([])
   const [propData, setPropData] = useState({ title: '', description: '', location: '', price: '', status: 'available' })
-  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imageFiles, setImageFiles] = useState<File[]>([])
 
   // Leads State
   const [leads, setLeads] = useState([])
@@ -100,16 +100,16 @@ export default function AdminPage() {
     e.preventDefault()
     setLoading(true)
     try {
-      let imageUrl = ''
-      if (imageFile) {
+      const imageUrls: string[] = []
+      for (const file of imageFiles) {
         const formData = new FormData()
-        formData.append('document', imageFile)
+        formData.append('document', file)
         const res = await uploadDocument(formData)
-        imageUrl = res.data.file_url
+        if (res.data?.file_url) imageUrls.push(res.data.file_url)
       }
-      await createProperty({ ...propData, images: imageUrl ? [imageUrl] : [] })
+      await createProperty({ ...propData, images: imageUrls })
       setPropData({ title: '', description: '', location: '', price: '', status: 'available' })
-      setImageFile(null)
+      setImageFiles([])
       fetchData()
     } catch (err) { alert('Error adding property') }
     finally { setLoading(false) }
@@ -377,12 +377,17 @@ export default function AdminPage() {
                     onChange={e => setPropData({...propData, description: e.target.value})}
                   />
                   <div className="space-y-2">
-                    <label className="text-xs uppercase tracking-widest text-muted-foreground">Property Image</label>
+                    <label className="text-xs uppercase tracking-widest text-muted-foreground">Property images</label>
                     <input 
                       type="file" 
-                      onChange={e => setImageFile(e.target.files?.[0] || null)} 
+                      accept="image/*"
+                      multiple
+                      onChange={e => setImageFiles(Array.from(e.target.files ?? []))} 
                       className="w-full text-sm" 
                     />
+                    {imageFiles.length > 0 && (
+                      <p className="text-xs text-muted-foreground">{imageFiles.length} file(s) selected</p>
+                    )}
                   </div>
                   <button disabled={loading} className="w-full py-3 bg-primary text-primary-foreground uppercase tracking-widest text-xs">
                     {loading ? 'Processing...' : 'Publish Property'}
