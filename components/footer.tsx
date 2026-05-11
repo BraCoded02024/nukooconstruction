@@ -2,8 +2,14 @@
 
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion"
 import { useRef } from "react"
-import { Instagram, Linkedin, Twitter, ArrowUp, MapPin, Phone } from "lucide-react"
+import { Instagram, ArrowUp, MapPin, Phone, Facebook } from "lucide-react"
 import { MagneticButton } from "./magnetic-button"
+
+/** Update the Facebook URL if it does not match your page (copy it from the browser on your Facebook page). */
+const SITE_SOCIAL = {
+  instagram: "https://www.instagram.com/nukooconstruction360/",
+  facebook: "https://www.facebook.com/NukooConstructionProperties",
+} as const
 
 const footerLinks = {
   properties: ["Featured", "New Listings", "Nukoo Construction", "Penthouses", "Waterfront"],
@@ -12,9 +18,8 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
+  { icon: Instagram, href: SITE_SOCIAL.instagram, label: "Instagram — @nukooconstruction360" },
+  { icon: Facebook, href: SITE_SOCIAL.facebook, label: "Facebook — Nukoo Construction & Properties" },
 ]
 
 function SocialButton({ social, index }: { social: typeof socialLinks[0], index: number }) {
@@ -33,6 +38,8 @@ function SocialButton({ social, index }: { social: typeof socialLinks[0], index:
     <motion.a
       ref={ref}
       href={social.href}
+      target={social.href.startsWith("http") ? "_blank" : undefined}
+      rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
       className="w-12 h-12 border border-background/20 flex items-center justify-center relative overflow-hidden group"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
